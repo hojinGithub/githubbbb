@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+     
+<mapper namespace="springBoot.react.oracle_ict02.dao.CustomerMapper">
+	
+	<!-- 고객등록 -->
+	<insert id="insertCustomer" parameterType="springBoot.react.oracle_ict02.dto.CustomerDTO">
+		INSERT INTO mvc_customer_tbl(No, email, name, password, hp, birthday)
+		VALUES((SELECT NVL(MAX(No)+1, 1) FROM mvc_customer_tbl), #{email}, #{name}, #{password}, #{hp}, #{birthday}) 
+	</insert>
+	
+	<!-- 고객 리스트 -->
+	<select id="customerList" resultType="springBoot.react.oracle_ict02.dto.CustomerDTO">
+		SELECT * FROM mvc_customer_tbl
+	</select>
+	
+	
+</mapper>

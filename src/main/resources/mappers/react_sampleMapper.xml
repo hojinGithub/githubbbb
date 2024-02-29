@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+     
+<mapper namespace="springBoot.react.oracle_ict02.dao.SampleMapper">
+	
+	<!-- 상품 목록 -->
+	<select id="sampleList" resultType="springBoot.react.oracle_ict02.dto.SampleDTO">
+		SELECT * FROM mvc_sample_tbl
+		 ORDER BY id
+	</select>
+	
+	<!-- 상품 등록 -->
+	<insert id="insertSample" parameterType="springBoot.react.oracle_ict02.dto.SampleDTO">
+		INSERT INTO mvc_sample_tbl(id, name, brand, madein, price)
+		VALUES((SELECT NVL(MAX(id) + 1, 1) FROM mvc_sample_tbl), #{name}, #{brand}, #{madein}, #{price})
+	</insert>
+	
+	<!-- 1건 조회 -->
+	<select id="findById" parameterType="int" resultType="springBoot.react.oracle_ict02.dto.SampleDTO">
+		SELECT * FROM mvc_sample_tbl WHERE id = #{id}
+	</select>
+	
+	<!-- 상품 수정 -->
+	<update id="updateSample" parameterType="springBoot.react.oracle_ict02.dto.SampleDTO" >
+		UPDATE mvc_sample_tbl
+		   SET name = #{name},
+		   	   brand = #{brand},
+		   	   madein = #{madein},
+		   	   price = #{price}
+		 WHERE id = #{id} 
+	</update>
+	
+	<!-- 상품 삭제 -->
+	<delete id="deleteSample" parameterType="int">
+		DELETE FROM mvc_sample_tbl WHERE id = #{id}
+	</delete>
+	
+</mapper>

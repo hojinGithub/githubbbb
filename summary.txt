@@ -1,0 +1,325 @@
+# API 연동의 기본 >> ->ApiService.js
+
+axios를 사용해서 GET(SELECT), PUT(EDIT), POST(INSERT), DELETE(DELETE) 등의 메서드로 API 요청을 할 수 있다.
+
+REST API 를 사용 할 때에는 하고 싶은 작업에 따라 다른 메서드로 요청을 할 수 있는데 메서드들은 다음 의미를 가지고 있습니다.
+
+GET: 데이터 조회
+POST: 데이터 등록
+PUT: 데이터 수정
+DELETE: 데이터 제거
+
+select : axios.get() => 스프링부트 @GetMaping
+insert : axios.post() => 스프링부트 @PostMaping
+update : axios.put() => 스프링부트 @PutMaping
+delete : axios.delete() => 스프링부트 @DeleteMaping
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+pom.xml
+
+<version>2.7.4</version>
+
+<java.version>11</java.version>
+
+		추가 및 수정 
+		수정 -> 마이바티스 버전 다운그레이드 
+	<!-- jpa -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-data-jpa</artifactId>
+	</dependency>
+	
+	<!-- 스프링 부트용 JDBC 드라이버 -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-jdbc</artifactId>
+	</dependency>
+	
+	<!-- 필수추가(@RequestMapping, ModelAndView) -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
+	
+	<!-- 마이바티스 -->
+	<dependency>
+		<groupId>org.mybatis.spring.boot</groupId>
+		<artifactId>mybatis-spring-boot-starter</artifactId>
+		<version>2.3.1</version> <!-- 3.0.3 에러 -> 2.3.1 다운그레이드 -->
+	</dependency>
+		
+	<!-- 오라클 -->
+	<dependency>
+		<groupId>com.oracle.database.jdbc</groupId>
+		<artifactId>ojdbc11</artifactId>
+		<scope>runtime</scope>
+	</dependency>
+	
+	<!-- devtools : 자동으로 어플리케이션 재시작  -->
+  <dependency>
+     <groupId>org.springframework.boot</groupId>
+     <artifactId>spring-boot-devtools</artifactId>
+     <scope>runtime</scope>
+     <optional>true</optional>
+  </dependency>
+      
+  <!-- 롬복 -->
+  <dependency>
+     <groupId>org.projectlombok</groupId>
+     <artifactId>lombok</artifactId>
+     <optional>true</optional>
+  </dependency>
+      
+  <!-- 직접추가함 : 타임리프 대신 JSP사용, 2개  dependency 누락시 작동안됨 -->
+  <!-- Servlet -->
+  <dependency>
+     <groupId>javax.servlet</groupId>
+     <artifactId>jstl</artifactId>
+     <version>1.2</version>
+  </dependency>
+   
+  <!-- 톰캣 추가 안하면 오류 -->
+   <dependency>
+       <groupId>org.apache.tomcat.embed</groupId>
+       <artifactId>tomcat-embed-jasper</artifactId>
+   </dependency> 
+  <!-- 타임리프 대신 JSP -->
+
+
+----------------------------------------------------------
+
+플젝 우클릭->maven->update project->Ok
+		->properties-> buildPath,compiler,project facets java11버전
+
+springBoot_basic_ict02 ->application.properties 복사 
+						-> 프로젝트 application.properties에 붙여넣기 
+						주석처리 2줄
+						-> # spring.mvc.view.prefix=/WEB-INF/views/
+						-> # spring.mvc.view.suffix=.jsp
+						application.properties -> dao패키지 이름,username,password 확인
+												->src/main/resources에  mappers 폴더생성
+												-> 매퍼 설정 변경 프로젝트명.dao 등
+
+메인에서 오류 없나 실행 확인 
+
+Sample -> DTO, DAO , Service, Controller 작성
+-----------------------------------------------------------------------------------------
+
+SampleDTO
+package springBoot.react.oracle_ict02.dto;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="mvc_sample_tbl")	// 생략시 table or view not found
+public class SampleDTO {
+	
+	private int id;			// PK
+	private String name;
+	private String brand;
+	private String madein;
+	private int price;
+	
+	
+	@Id
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getBrand() {
+		return brand;
+	}
+	
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+	
+	public String getMadein() {
+		return madein;
+	}
+	
+	public void setMadein(String madein) {
+		this.madein = madein;
+	}
+	
+	public int getPrice() {
+		return price;
+	}
+	
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	
+}
+
+--------------------------------------------------------------
+SampleService , ServiceImpl
+
+package springBoot.react.oracle_ict02.service;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+
+
+import springBoot.react.oracle_ict02.dto.SampleDTO;
+
+public interface SampleService {
+	
+	// 상품목록
+	public List<SampleDTO> listAll()
+			throws ServletException, IOException;
+	
+	// 상품 등록
+	public int insertSample(SampleDTO dto)
+			throws ServletException, IOException;
+	
+	// 상품 수정
+	public int updateSample(SampleDTO dto)
+			throws ServletException, IOException;
+	
+	// 상품 삭제
+	public int deleteSample(int id)
+			throws ServletException, IOException;
+	
+	// 상품 상세페이지
+	public SampleDTO findById(int id)
+			throws ServletException, IOException;
+	
+
+}
+
+
+package springBoot.react.oracle_ict02.service;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+
+
+import springBoot.react.oracle_ict02.dto.SampleDTO;
+
+public interface SampleService {
+	
+	// 상품목록
+	public List<SampleDTO> listAll()
+			throws ServletException, IOException;
+	
+	// 상품 등록
+	public int insertSample(SampleDTO dto)
+			throws ServletException, IOException;
+	
+	// 상품 수정
+	public int updateSample(SampleDTO dto)
+			throws ServletException, IOException;
+	
+	// 상품 삭제
+	public int deleteSample(int id)
+			throws ServletException, IOException;
+	
+	// 상품 상세페이지
+	public SampleDTO findById(int id)
+			throws ServletException, IOException;
+	
+
+}
+
+
+-----------------------------------------------------------
+SampleDAO
+package springBoot.react.oracle_ict02.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import springBoot.react.oracle_ict02.dto.SampleDTO;
+
+@Mapper	// => DAOImpl 작성하지 않아도 mapper 호출 가능 
+public interface SampleMapper {
+	
+	// 상품목록
+	public List<SampleDTO> sampleList();
+	
+	// 상품 등록
+	public int insertSample(SampleDTO dto);
+	
+	// 상품 수정
+	public int updateSample(SampleDTO dto);
+	
+	// 상품 삭제
+	public int deleteSample(int id);
+	
+	// 상품 상세페이지
+	public SampleDTO findById(int id);
+
+}
+
+
+
+-----------------------------------------------------------------
+http://localhost:8081/samples 
+
+결과 => 
+// 20240226143835
+// http://localhost:8081/samples
+
+[
+  {
+    "id": 1,
+    "name": "에어컨",
+    "brand": "LG",
+    "madein": "KOREA",
+    "price": 1500000
+  },
+  {
+    "id": 2,
+    "name": "냉장고",
+    "brand": "삼성",
+    "madein": "KOREA",
+    "price": 1500000
+  }
+]
+
+
+
+리액트
+비주얼 스튜디오open -> open folder -> 폴더 선택
+터미널 - Command Prompt 선택
+
+front-end 플젝 생성
+npx create-react-ap front-end
+
+해당 폴더로 이동
+springBoot_react_oracle_ict02 > cd front-end
+
+npm start 실행
+
+visual studio code -> front-end 
+나머지 주석 => 리액트 SUMMARY.md 
+
+
+
+
+
+
+
+
+												
